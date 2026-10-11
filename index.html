@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LOAF status</title>
+<style>
+  :root{--bg:#fff;--fg:#17202a;--ok:#2f6b3a;--warn:#a15c00;--bad:#b3261e;--muted:#566574}
+  @media (prefers-color-scheme:dark){:root{--bg:#10161c;--fg:#e6ecf1;--ok:#8fd19b;--warn:#ffc266;--bad:#ff8a80;--muted:#9aa9b6}}
+  body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);max-width:36rem;margin:0 auto;padding:24px 16px}
+  h1{font-size:1.4rem;margin:0 0 .5rem}
+  #state{font-weight:600}
+  .operational{color:var(--ok)}.degraded{color:var(--warn)}.outage{color:var(--bad)}
+  small,li small{color:var(--muted)}
+</style>
+<h1>LOAF status</h1>
+<p><span id="state">Checking...</span> <span id="message"></span></p>
+<ul id="incidents"></ul>
+<p><small id="updated"></small></p>
+<script>
+// status.json is edited by hand during an incident (see docs). This page sends no cookies and loads nothing else.
+fetch('status.json', { cache: 'no-store' }).then((r) => r.json()).then((s) => {
+  const label = { operational: 'Operational.', degraded: 'Degraded.', outage: 'Outage.' };
+  const state = document.getElementById('state');
+  state.textContent = label[s.state] || 'Unknown.';
+  state.className = s.state;
+  document.getElementById('message').textContent = s.message || '';
+  document.getElementById('updated').textContent = 'Updated ' + (s.updated || '');
+  const list = document.getElementById('incidents');
+  for (const i of s.incidents || []) {
+    const li = document.createElement('li');
+    li.textContent = i.title + ' ';
+    const small = document.createElement('small');
+    small.textContent = i.at + ' ' + (i.note || '');
+    li.appendChild(small);
+    list.appendChild(li);
+  }
+}).catch(() => { document.getElementById('state').textContent = 'Status is unavailable right now.'; });
+</script>
