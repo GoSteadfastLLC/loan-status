@@ -1,37 +1,91 @@
 <!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LOAF status</title>
+<meta name="description" content="How LOAF's tools and the pieces around them are doing right now.">
 <style>
-  :root{--bg:#fff;--fg:#17202a;--ok:#2f6b3a;--warn:#a15c00;--bad:#b3261e;--muted:#566574}
-  @media (prefers-color-scheme:dark){:root{--bg:#10161c;--fg:#e6ecf1;--ok:#8fd19b;--warn:#ffc266;--bad:#ff8a80;--muted:#9aa9b6}}
-  body{font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--fg);max-width:36rem;margin:0 auto;padding:24px 16px}
-  h1{font-size:1.4rem;margin:0 0 .5rem}
-  #state{font-weight:600}
-  .operational{color:var(--ok)}.degraded{color:var(--warn)}.outage{color:var(--bad)}
-  small,li small{color:var(--muted)}
+@font-face{font-family:"Baloo 2";font-weight:800;font-display:swap;src:url(fonts/baloo2-800.ttf) format("truetype")}
+@font-face{font-family:"Baloo 2";font-weight:700;font-display:swap;src:url(fonts/baloo2-700.ttf) format("truetype")}
+@font-face{font-family:"Public Sans";font-weight:500;font-display:swap;src:url(fonts/publicsans-500.ttf) format("truetype")}
+@font-face{font-family:"Public Sans";font-weight:700;font-display:swap;src:url(fonts/publicsans-700.ttf) format("truetype")}
+:root{
+  --bg:#F3F5F1;--card:#FFFFFF;--line:#D6DDD7;--ink:#10291F;--muted:#4F6359;--accent:#1F5A43;--accent-soft:#DCEBE3;
+  --ok:#1F7A4D;--ok-soft:#DCEBE3;--warn:#8A5A14;--warn-soft:#F6E7C8;--bad:#B3261E;--bad-soft:#FBE4E2;--plan:#4F6359;--plan-soft:#E7ECE8;
+  --shadow:0 1px 2px rgba(16,41,31,.08),0 4px 12px rgba(16,41,31,.06);
+  --display:"Baloo 2","Arial Rounded MT Bold",system-ui,sans-serif;--sans:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --logo-light:block;--logo-dark:none;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0D1A15;--card:#13241D;--line:#25392F;--ink:#E9EFEA;--muted:#9FB2A8;--accent:#6CC29C;--accent-soft:#173528;
+  --ok:#6CCB94;--ok-soft:#173528;--warn:#E8B44A;--warn-soft:#33270F;--bad:#F2867E;--bad-soft:#3A1512;--plan:#9FB2A8;--plan-soft:#1C2F26;
+  --shadow:none;--logo-light:none;--logo-dark:block;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans)}
+.wrap{max-width:44rem;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0 20px}
+.logo{height:34px;width:auto}.logo.light{display:var(--logo-light)}.logo.dark{display:var(--logo-dark)}
+header span{font:700 .85rem var(--sans);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.banner{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow)}
+.dot{flex:none;width:18px;height:18px;border-radius:50%;background:var(--plan)}
+.banner.operational .dot{background:var(--ok)}.banner.degraded .dot{background:var(--warn)}.banner.outage .dot{background:var(--bad)}
+h1{font:800 1.5rem/1.2 var(--display);margin:0}
+.banner p{margin:2px 0 0;color:var(--muted)}
+h2{font:700 1.15rem/1.3 var(--display);margin:32px 0 10px}
+.list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;gap:12px;justify-content:space-between;align-items:flex-start}
+.item h3{font:700 1rem/1.3 var(--sans);margin:0}
+.item p{margin:2px 0 0;color:var(--muted);font-size:.92rem}
+.tag{flex:none;font:700 .75rem var(--sans);border-radius:999px;padding:4px 10px;white-space:nowrap;background:var(--plan-soft);color:var(--plan)}
+.tag.operational{background:var(--ok-soft);color:var(--ok)}.tag.degraded{background:var(--warn-soft);color:var(--warn)}.tag.outage{background:var(--bad-soft);color:var(--bad)}
+.inc{background:var(--warn-soft);border-radius:14px;padding:12px 16px}
+.inc small{display:block;color:var(--muted)}
+footer{margin-top:32px;color:var(--muted);font-size:.9rem}
+footer p{margin:6px 0}
+a{color:var(--accent)}
 </style>
-<h1>LOAF status</h1>
-<p><span id="state">Checking...</span> <span id="message"></span></p>
-<ul id="incidents"></ul>
-<p><small id="updated"></small></p>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a href="https://askloaf.com/" aria-label="LOAF home"><img class="logo light" src="loaf-wordmark.svg" alt="LOAF"><img class="logo dark" src="loaf-wordmark-on-dark.svg" alt="" aria-hidden="true"></a>
+  <span>Status</span>
+</header>
+<div id="banner" class="banner"><span class="dot" aria-hidden="true"></span><div><h1 id="state">Checking...</h1><p id="message"></p></div></div>
+<div id="incidents"></div>
+<div id="groups"></div>
+<footer>
+  <p id="updated"></p>
+  <p>These statuses are updated by the LOAF team. They show what we know, not a promise about the future.</p>
+  <p>Something look wrong to you? <a href="https://askloaf.com/app/">Sign in</a> and use Submit a Correction.</p>
+</footer>
+</div>
 <script>
-// status.json is edited by hand during an incident (see docs). This page sends no cookies and loads nothing else.
-fetch('status.json', { cache: 'no-store' }).then((r) => r.json()).then((s) => {
-  const label = { operational: 'Operational.', degraded: 'Degraded.', outage: 'Outage.' };
-  const state = document.getElementById('state');
-  state.textContent = label[s.state] || 'Unknown.';
-  state.className = s.state;
-  document.getElementById('message').textContent = s.message || '';
-  document.getElementById('updated').textContent = 'Updated ' + (s.updated || '');
-  const list = document.getElementById('incidents');
-  for (const i of s.incidents || []) {
-    const li = document.createElement('li');
-    li.textContent = i.title + ' ';
-    const small = document.createElement('small');
-    small.textContent = i.at + ' ' + (i.note || '');
-    li.appendChild(small);
-    list.appendChild(li);
-  }
-}).catch(() => { document.getElementById('state').textContent = 'Status is unavailable right now.'; });
+// status.json is edited by hand (see the LOAF repo's docs/incident-runbook.md). This page sends no cookies and loads nothing from other sites.
+var LABEL={operational:'Operational',degraded:'Slower or partly down',outage:'Down',planned:'Not released yet'};
+var HEAD={operational:'All good',degraded:'Some things are slow',outage:'Something is down'};
+function el(tag,cls,text){var e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e}
+fetch('status.json',{cache:'no-store'}).then(function(r){return r.json()}).then(function(s){
+  var state=HEAD[s.state]||'Status unknown';
+  document.getElementById('state').textContent=state;
+  document.getElementById('banner').className='banner '+(s.state||'');
+  document.getElementById('message').textContent=s.message||'';
+  document.getElementById('updated').textContent='Last updated '+(s.updated?new Date(s.updated).toUTCString():'unknown')+'.';
+  var inc=document.getElementById('incidents');
+  (s.incidents||[]).forEach(function(i){var d=el('div','inc');d.appendChild(el('strong','',i.title));d.appendChild(el('small','',(i.at||'')+(i.note?' '+i.note:'')));inc.appendChild(d)});
+  var groups={},order=[];
+  (s.components||[]).forEach(function(c){if(!groups[c.group]){groups[c.group]=[];order.push(c.group)}groups[c.group].push(c)});
+  var root=document.getElementById('groups');
+  order.forEach(function(g){
+    root.appendChild(el('h2','',g));
+    var ul=el('ul','list');
+    groups[g].forEach(function(c){
+      var li=el('li','item');var left=document.createElement('div');
+      left.appendChild(el('h3','',c.name));left.appendChild(el('p','',c.about||''));
+      li.appendChild(left);li.appendChild(el('span','tag '+c.status,LABEL[c.status]||'Unknown'));ul.appendChild(li)});
+    root.appendChild(ul)});
+}).catch(function(){document.getElementById('state').textContent='Status is unavailable right now.'});
 </script>
+</body>
+</html>

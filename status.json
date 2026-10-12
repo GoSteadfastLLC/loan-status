@@ -1,6 +1,20 @@
 {
-  "updated": "2026-10-11T00:00:00Z",
+  "updated": "2026-10-12T19:30:00Z",
   "state": "operational",
-  "message": "All systems operating normally.",
+  "message": "Everything we run is working normally.",
+  "components": [
+    { "group": "Tools", "name": "LOAF Contracts", "status": "operational", "about": "Reads a purchase contract and pulls out the key terms, with the page each came from." },
+    { "group": "Tools", "name": "LOAF Conditions", "status": "operational", "about": "Turns an underwriter's conditions letter into a checklist sorted by who supplies each item." },
+    { "group": "Tools", "name": "LOAF Payoff", "status": "operational", "about": "Reads a credit report and works out which debts to pay at closing and the new payment." },
+    { "group": "Tools", "name": "LOAF Corrections", "status": "operational", "about": "Lets you tell us when a result looks wrong so we can look at it." },
+    { "group": "Tools", "name": "LOAF Credit", "status": "planned", "about": "Not released yet." },
+    { "group": "Tools", "name": "LOAF Borrower List", "status": "planned", "about": "Not released yet." },
+    { "group": "Tools", "name": "LOAF Refi", "status": "planned", "about": "Not released yet." },
+    { "group": "Around the tools", "name": "Website", "status": "operational", "about": "askloaf.com and the pages you read before signing in." },
+    { "group": "Around the tools", "name": "Sign-in", "status": "operational", "about": "Signing in with your password and authenticator code." },
+    { "group": "Around the tools", "name": "Uploads and reading", "status": "operational", "about": "Sending a document and getting the result back. A document that fails is not counted." },
+    { "group": "Around the tools", "name": "Results and PDF export", "status": "operational", "about": "Opening your results and saving a branded PDF." },
+    { "group": "Around the tools", "name": "Billing", "status": "planned", "about": "Not turned on yet. The pilot is free." }
+  ],
   "incidents": []
 }
